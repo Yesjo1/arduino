@@ -37,19 +37,26 @@ void openGate(){
 
 void gateOpenEntry(){
   previousMillisCountDown = millis();
-  controlBothTrafficLights(YELLOW, OFF);
 }
 
 void gateOpenDo(){
-  //should only display number 5 after iSegmentCount is at SEGMENTEND and displayed number is 0.
+  //should only display number 5 after the countdown is 0.
   if(hasTimePassed(previousMillisCountDown, COUNTDOWNTIME) && iSegmentCount == SEGMENTEND){
     setiSegmentCount(5);
     displayNumber(getiSegmentCount());
     setCountdownStatus(true);
+    setTrainPassing(false);
+
+    //the reason i do this here is not because they are still red but because the array holding whatever colour is lit on which side, is only 2 elements large. they are yellow here before i call this.
+    controlBothTrafficLights(RED, ON);
   }
   if(!getCountdownStatus()){
     segmentDisplayLoop();
     trainPassingCycle();
+  }
+  //the yellow lights need to be turned off when the countdown has finished
+  else if(getCountdownStatus()){
+    controlBothTrafficLights(YELLOW, OFF);
   }
 }
 
@@ -114,4 +121,3 @@ void gateClosedDo(){
 void gateClosedExit(){
   //do stuff
 }
-

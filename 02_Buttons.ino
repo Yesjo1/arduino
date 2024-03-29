@@ -98,6 +98,7 @@ void checkTrafficButtonPressesDuringCycle(short direction){ //direction can only
   else if(((getButtonState(direction) && getButtonPressedDuringCyclePrecedence() == 0) || (getButtonState(direction) && getButtonPressedDuringCyclePrecedence() == 1))){
     setButtonPressedDuringCycle(direction, true);
   }
+  Serial.println("checkTrafficButtonPresses");
 }
 
 void setupButtons() {
@@ -203,11 +204,6 @@ void buttonPressedExit() {
 
 // --- BUTTON_STATE_CHECK_RELEASED -----------
 void buttonCheckReleasedEntry(short buttonId) {
-  // Serial.println();
-  // Serial.print("Setting buttonId ");
-  // Serial.print(buttonId);
-  // Serial.print(" to: state_check_released");
-  // Serial.println();
 
   if(buttonId == 0 || buttonId == 1){
     checkTrafficButtonPressesDuringCycle(buttonId);

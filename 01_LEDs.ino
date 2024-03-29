@@ -21,11 +21,11 @@ unsigned long long previousMillisLEDS = 0;
 unsigned long long previousMillisClearance = 0;
 
 //5 seconds of green before turning yellow
-const unsigned short GREENTIME = 600;
-const unsigned short YELLOWTIME = 500;
-const unsigned short FLASHTIME = 400;
+const unsigned short GREENTIME = 2000;
+const unsigned short YELLOWTIME = 1000;
+const unsigned short FLASHTIME = 500;
 
-const unsigned short CLEARANCETIME = 500;
+const unsigned short CLEARANCETIME = 2000;
 
 //cycleRunning holds the boolean that knows whether or not a traffic cycle is finished per direction (north, south)
 bool cycleRunning = false;
@@ -78,12 +78,13 @@ void controlTrafficLights(short direction, bool onOff) {
 //a traffic cycle is just the LEDs turning green, yellow and then red. has some code to check \
 for double presses.
 void trafficCycle(short direction) {
+  Serial.println("traffic cycle");
   setCycleRunning(true);
   //clearance(time) = ontruimingstijd
-  if(hasTimePassed(previousMillisClearance, CLEARANCETIME)){
-    // setCycleRunning(true);
-
+  if(hasTimePassed(previousMillisClearance, CLEARANCETIME) && getCountdownStatus()){
+    Serial.println("getcountdownstatus");
     if (trafficLight[direction] == RED) {
+      Serial.println("trafficlight is red");
       previousMillisLEDS = millis();
       controlTrafficLight(direction, RED, OFF);
       controlTrafficLight(direction, GREEN, ON);

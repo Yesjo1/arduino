@@ -63,7 +63,6 @@ if(iSegmentCount >= 0 && hasTimePassed(previousMillisCountDown, COUNTDOWNTIME)){
   previousMillisCountDown = millis();
   iSegmentCount--;
  }
-
  //the only time when this should run is when the segmentdisplay is also running
  //(or the other way around, this is just the way i did it)
   buzzerTickThreeTimes();
