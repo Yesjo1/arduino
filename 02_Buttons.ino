@@ -209,9 +209,9 @@ void buttonCheckReleasedEntry(short buttonId) {
   // Serial.print(" to: state_check_released");
   // Serial.println();
 
-  // if(buttonId == 0 || buttonId == 1 && buttonId!=getActiveButton){
-  //   checkTrafficButtonPressesDuringCycle(buttonId);
-  // }
+  if(buttonId == 0 || buttonId == 1){
+    checkTrafficButtonPressesDuringCycle(buttonId);
+  }
 
   buttonStates[buttonId] = BUTTON_STATE_CHECK_RELEASED;
   buttonPreviousMillis = millis();
