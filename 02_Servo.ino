@@ -35,34 +35,6 @@ void openGate(){
   }
 }
 
-void gateOpenEntry(){
-  previousMillisCountDown = millis();
-}
-
-void gateOpenDo(){
-  //should only display number 5 after the countdown is 0.
-  if(hasTimePassed(previousMillisCountDown, COUNTDOWNTIME) && iSegmentCount == SEGMENTEND){
-    setiSegmentCount(5);
-    displayNumber(getiSegmentCount());
-    setCountdownStatus(true);
-    setTrainPassing(false);
-
-    //the reason i do this here is not because they are still red but because the array holding whatever colour is lit on which side, is only 2 elements large. they are yellow here before i call this.
-    controlBothTrafficLights(RED, ON);
-  }
-  if(!getCountdownStatus()){
-    segmentDisplayLoop();
-    trainPassingCycle();
-  }
-  //the yellow lights need to be turned off when the countdown has finished
-  else if(getCountdownStatus()){
-    controlBothTrafficLights(YELLOW, OFF);
-  }
-}
-
-void gateOpenExit(){
-}
-
 void gateClosingEntry(){//in case of a double press this needs to be different as the traffic lights need to wait
   // Serial.println("gate is closing servo.ino");
   controlTrafficLights(NORTH, OFF);
@@ -98,6 +70,18 @@ void gateOpeningEntry(){
   setCountdownStatus(false);
 }
 
+void gateOpenEntry(){
+  previousMillisCountDown = millis();
+}
+
+void gateOpenDo(){
+  countSegmentDown();
+}
+
+void gateOpenExit(){
+//  <nothing>
+}
+
 void gateOpeningDo(){
   openGate();
   trainPassingCycle();
@@ -107,10 +91,11 @@ void gateOpeningDo(){
 }
 
 void gateOpeningExit(){
+  // <nothing>
 }
 
 void gateClosedEntry(){
-
+  // <nothing>
 }
 
 void gateClosedDo(){
@@ -119,5 +104,5 @@ void gateClosedDo(){
 }
 
 void gateClosedExit(){
-  //do stuff
+  // <nothing>
 }

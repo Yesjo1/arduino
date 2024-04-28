@@ -11,6 +11,7 @@ const short BUTTON_STATE_CHECK_PRESSED = 1;
 const short BUTTON_STATE_PRESSED = 2;
 const short BUTTON_STATE_CHECK_RELEASED = 3;
 
+//did not know for sure whether or not i was allowed to use enums
 const short TRAFFIC_NORTH_BUTTON = 0;
 const short TRAFFIC_SOUTH_BUTTON = 1;
 const short TRAIN_COMING_EAST_BUTTON = 2;
@@ -20,8 +21,11 @@ const short TRAIN_COMING_WEST_BUTTON = 3;
 short buttonPressedDuringCyclePrecedence = 2;
 bool buttonPressedDuringCycle[2] = {0, 0};
 
+//this array holds how many times the button(s) are pressed
 short buttonPressedCounter[2] = {0, 0};
-bool doublePressDirections[2] = {0, 0};//naamgeving is een ding i guess geen idee hoe ik deze array moet noemen
+
+//this array holds on which button(s) a double press was registered
+bool doublePressDirections[2] = {0, 0};
 
 //this array holds the state of each button
 //BUTTON_PIN_LEDS_NORTH, BUTTON_PIN_LEDS_SOUTH, BUTTON_PIN_TRAIN_NORTH, BUTTON_PIN_TRAIN_SOUTH; 
@@ -30,9 +34,13 @@ short buttonStates[4] = {0, 0, 0, 0};
 
 unsigned long long buttonTimer;
 unsigned long long buttonPreviousMillis;
-const short DEBOUNCE_INTERVAL = 10; //debounce timer
+
+//the amount of time in ms in which debounce should be cleared
+const short DEBOUNCE_INTERVAL = 10;
 
 unsigned long long doublePressTimer = 0;
+
+//amount of time in ms in which a double press can be registered
 const int DOUBLEPRESSWINDOW=500;
 
 const short AMOUNT_OF_BUTTONS = 4;
@@ -101,13 +109,49 @@ void checkTrafficButtonPressesDuringCycle(short direction){ //direction can only
   Serial.println("checkTrafficButtonPresses");
 }
 
+void handleActions(short buttonId){
+  //here, trainComing acts as a "boolean", but is actually an integer that holds the value of which button was pressed last.
+  //a train wouldn't be coming if the last button pressed was under 2, (values 0 or 1), only if the buttons pressed were 2 or 3,
+  //as values 0 and 1 are reserved for crossing the railway
+  if((buttonId == TRAIN_COMING_EAST_BUTTON || buttonId == TRAIN_COMING_WEST_BUTTON) && !trainPassing){
+    setTrainComing(buttonId);
+    setTrainPassing(true);
+  }
+  //buttonId > 1 meaning the possible buttons pressed were either 2 or 3 which *are* "train sensors" and buttonId != last button pressed
+  else if(buttonId != trainComing && buttonId > 1 && trainPassing) {
+    setTrainComing(-1); //no need to remember the previous button pressed as in this case the train "passed", so just reset it to 0
+    setTrainPassing(false);
+  }
+  else if(buttonId == TRAFFIC_NORTH_BUTTON){
+    //if the window of double press hasn't yet been reached, set the double press variable to be true for respective direction
+    if(!hasTimePassed(doublePressTimer, DOUBLEPRESSWINDOW) && getButtonPressedCounter(TRAFFIC_NORTH_BUTTON) == 1){
+      setDoublePress(TRAFFIC_NORTH_BUTTON, true);
+      setButtonPressedCounter(TRAFFIC_NORTH_BUTTON, 2);
+    }
+    else if(getButtonPressedCounter(TRAFFIC_NORTH_BUTTON)<2){ //only under 2, if it is already 2, it shouldn't be possible to make it a double press
+      setButtonPressedCounter(TRAFFIC_NORTH_BUTTON, 1);
+    }
+    doublePressTimer = millis();
+  }
+  else if(buttonId == TRAFFIC_SOUTH_BUTTON){
+    if(!hasTimePassed(doublePressTimer, DOUBLEPRESSWINDOW) && getButtonPressedCounter(TRAFFIC_SOUTH_BUTTON) == 1){
+      setDoublePress(TRAFFIC_SOUTH_BUTTON, true);
+      setButtonPressedCounter(TRAFFIC_SOUTH_BUTTON, 2);
+    }
+    else if(getButtonPressedCounter(TRAFFIC_SOUTH_BUTTON)<2){
+      setButtonPressedCounter(TRAFFIC_SOUTH_BUTTON, 1);
+    }
+    doublePressTimer = millis();
+  }
+}
+
 void setupButtons() {
   pinMode(BUTTON_PIN_TRAIN_NORTH, INPUT_PULLUP);
   pinMode(BUTTON_PIN_TRAIN_SOUTH, INPUT_PULLUP);
   pinMode(BUTTON_PIN_LEDS_NORTH, INPUT_PULLUP);
   pinMode(BUTTON_PIN_LEDS_SOUTH, INPUT_PULLUP);
 
-  trainPassing = false;
+  setTrainPassing(false);
 //  buttonTimer = setupTimer(DEBOUNCE_INTERVAL);
 //  buttonReleasedEntry();/
 }
@@ -158,40 +202,7 @@ void buttonCheckPressedExit() {
 // --- BUTTON_STATE_PRESSED -----------
 void buttonPressedEntry(short buttonId) {
   buttonStates[buttonId] = BUTTON_STATE_PRESSED;
-  
-  //here, trainComing acts as a "boolean", but is actually an integer that holds the value of which button was pressed last.
-  //a train wouldn't be coming if the last button pressed was under 2, (values 0 or 1), only if the buttons pressed were 2 or 3,
-  //as values 0 and 1 are reserved for crossing the railway
-  if((buttonId == TRAIN_COMING_EAST_BUTTON || buttonId == TRAIN_COMING_WEST_BUTTON) && !trainPassing){
-    setTrainComing(buttonId);
-    setTrainPassing(true);
-  }
-  //buttonId > 1 meaning the possible buttons pressed were either 2 or 3 which *are* "train sensors" and buttonId != last button pressed
-  else if(buttonId != trainComing && buttonId > 1 && trainPassing) {
-    setTrainComing(-1); //no need to remember the previous button pressed as in this case the train "passed", so just reset it to 0
-    setTrainPassing(false);
-  }
-  else if(buttonId == TRAFFIC_NORTH_BUTTON){
-    //if the window of double press hasn't yet been reached, set the double press variable to be true for respective direction
-    if(!hasTimePassed(doublePressTimer, DOUBLEPRESSWINDOW) && getButtonPressedCounter(TRAFFIC_NORTH_BUTTON) == 1){
-      setDoublePress(TRAFFIC_NORTH_BUTTON, true);
-      setButtonPressedCounter(TRAFFIC_NORTH_BUTTON, 2);
-    }
-    else if(getButtonPressedCounter(TRAFFIC_NORTH_BUTTON)<2){ //only under 2, if it is already 2, it shouldn't be possible to make it a double press
-      setButtonPressedCounter(TRAFFIC_NORTH_BUTTON, 1);
-    }
-    doublePressTimer = millis();
-  }
-  else if(buttonId == TRAFFIC_SOUTH_BUTTON){
-    if(!hasTimePassed(doublePressTimer, DOUBLEPRESSWINDOW) && getButtonPressedCounter(TRAFFIC_SOUTH_BUTTON) == 1){
-      setDoublePress(TRAFFIC_SOUTH_BUTTON, true);
-      setButtonPressedCounter(TRAFFIC_SOUTH_BUTTON, 2);
-    }
-    else if(getButtonPressedCounter(TRAFFIC_SOUTH_BUTTON)<2){
-      setButtonPressedCounter(TRAFFIC_SOUTH_BUTTON, 1);
-    }
-    doublePressTimer = millis();
-  }
+  handleActions(buttonId);
 }
 
 void buttonPressedDo() {
@@ -205,7 +216,7 @@ void buttonPressedExit() {
 // --- BUTTON_STATE_CHECK_RELEASED -----------
 void buttonCheckReleasedEntry(short buttonId) {
 
-  if(buttonId == 0 || buttonId == 1){
+  if(buttonId == TRAFFIC_NORTH_BUTTON || buttonId == TRAFFIC_SOUTH_BUTTON){
     checkTrafficButtonPressesDuringCycle(buttonId);
   }
 
@@ -234,22 +245,6 @@ short getTrainComing(){
 
 void setTrainComing(short value){
   trainComing = value;
-}
-
-bool isButtonPressedSouth(){
-  return false;
-}
-
-bool isButtonPressedNorth(){
-  return false;
-}
-
-bool isButtonDoublePressedSouth(){
-  return false;
-}
-
-bool isButtonDoublePressedNorth(){
-  return false;
 }
 
 void buttonsLoop() {

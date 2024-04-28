@@ -1,7 +1,7 @@
 unsigned long long currentMillis = 0;
 unsigned long long previousMillisSlowTrain = 0;
-const unsigned long ONTRUIMINGSTIJD = 2000;
-const unsigned long SLOWTRAININTERVAL = 2000;
+const unsigned short ONTRUIMINGSTIJD = 2000;
+const unsigned short SLOWTRAININTERVAL = 2000;
 
 int state = 0;
 
@@ -18,18 +18,14 @@ const short TRAFFIC_CYCLE_NORTH_LONG = 7;
 void trafficCycleSouthEntry() {
   setButtonPressedDuringCyclePrecedence(2);
   setButtonPressedDuringCycle(TRAFFIC_SOUTH_BUTTON, false);
-  Serial.println("traffic cycle south entry");
 }
 
 void trafficCycleNorthEntry() {
   setButtonPressedDuringCyclePrecedence(2);
   setButtonPressedDuringCycle(TRAFFIC_NORTH_BUTTON, false);
-  Serial.println("traffic cycle north entry");
 }
 
 void trafficCycleSouthDo() {
-    Serial.println("traffic cycle south do");
-
   trafficCycle(SOUTH);
 }
 
@@ -38,13 +34,11 @@ void trafficCycleNorthDo() {
 }
 
 void trafficCycleSouthExit() {
-  Serial.println("traffic cycle south exit");
   setButtonPressedDuringCyclePrecedence(2);
   setButtonPressedDuringCycle(TRAFFIC_SOUTH_BUTTON, false);
 }
 
 void trafficCycleNorthExit() {
-  Serial.println("traffic cycle north exit");
   setButtonPressedDuringCyclePrecedence(2);
   setButtonPressedDuringCycle(TRAFFIC_NORTH_BUTTON, false);
 }
@@ -52,25 +46,21 @@ void trafficCycleNorthExit() {
 void statesLoop() {
   switch (state) {
     case GATE_STATE_OPEN:
-    potentiometerLoop();
       gateOpenDo();
       if(getCountdownStatus()){
         if (getTrainPassing() && ((getTrainComing() == TRAIN_COMING_EAST_BUTTON) || (getTrainComing() == TRAIN_COMING_WEST_BUTTON))) {
-          Serial.println("train is coming east");  // east = 3
           gateOpenExit();
           state = GATE_STATE_CLOSING;
           gateClosingEntry();
         }
           //didn't really feel like making an elegant solution for this
           else if(getButtonPressedDuringCyclePrecedence() == 1){
-            Serial.println("traffic crossing south");
             setButtonPressedDuringCyclePrecedence(2);
             gateOpenExit();
             state = TRAFFIC_CYCLE_SOUTH;
             trafficCycleSouthEntry();
           }
           else if(getButtonPressedDuringCyclePrecedence() == 0){
-            Serial.println("traffic crossing north");
             setButtonPressedDuringCyclePrecedence(2);
             gateOpenExit();
             state = TRAFFIC_CYCLE_NORTH;
@@ -78,13 +68,11 @@ void statesLoop() {
           }
           // getButtonPressedDuringCycle(TRAFFIC_NORTH_BUTTON)
           else if (getButtonState(TRAFFIC_SOUTH_BUTTON) || getButtonPressedDuringCycle(TRAFFIC_SOUTH_BUTTON)) {
-            Serial.println("traffic crossing south");
             gateOpenExit();
             state = TRAFFIC_CYCLE_SOUTH;
             trafficCycleSouthEntry();
           }
           else if (getButtonState(TRAFFIC_NORTH_BUTTON) || getButtonPressedDuringCycle(TRAFFIC_NORTH_BUTTON)) {
-            Serial.println("traffic crossing north");
             gateOpenExit();
             state = TRAFFIC_CYCLE_NORTH;
             trafficCycleNorthEntry();

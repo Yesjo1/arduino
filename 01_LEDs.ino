@@ -1,3 +1,4 @@
+//again i wasn't sure whether or not i was allowed to use enums
 const short NORTH = 0;
 const short SOUTH = 1;
 
@@ -21,21 +22,22 @@ unsigned long long previousMillisLEDS = 0;
 unsigned long long previousMillisClearance = 0;
 
 //5 seconds of green before turning yellow
-const unsigned short GREENTIME = 2000;
-const unsigned short YELLOWTIME = 1000;
+const unsigned short GREENTIME = 5000;
+const unsigned short YELLOWTIME = 2000;
 const unsigned short FLASHTIME = 500;
 
+//clearancetime, in dutch: ontruimingstijd
 const unsigned short CLEARANCETIME = 2000;
-
-//cycleRunning holds the boolean that knows whether or not a traffic cycle is finished per direction (north, south)
-bool cycleRunning = false;
-
 bool clearanceStatus = false;
+
+//cyclerunning refers to the mentioned "verkeerslichtcyclus", or trafficCycle
+bool cycleRunning = false;
 
 const short LIGHTS_PINS[2][3] = {
   { 5, 6, 7 },
   { 8, 9, 10 }
 };
+
 
 bool getClearanceStatus(){
   return clearanceStatus;

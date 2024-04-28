@@ -2,7 +2,7 @@ const short BUZZERPIN = 13;
 
 unsigned long long prevMillisBuzzer = 0;
 unsigned long long prevMillisBuzzerThree = 0;
-const unsigned long INTERVALBUZZER = 150;
+const short INTERVALBUZZER = 150;
 
 void buzzerTick(){
   if(hasTimePassed(prevMillisBuzzer, INTERVALBUZZER)){

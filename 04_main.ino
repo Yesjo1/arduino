@@ -8,7 +8,6 @@ void setup() {
 
 void loop() {
   buttonsLoop();
+  potentiometerLoop();
   statesLoop();
-  // segmentDisplayLoop();
-
 }
